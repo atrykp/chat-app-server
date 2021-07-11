@@ -4,6 +4,7 @@ const cors = require("cors");
 
 const user = require("./routes/userRoutes");
 const connectDb = require("./mongoose");
+const errorMiddleware = require("./middlewares/errorMiddleware");
 
 const app = express();
 require("dotenv").config();
@@ -16,6 +17,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 //routes
 app.use("/user", user);
+app.use(errorMiddleware.notFound);
+app.use(errorMiddleware.errorHandler);
+
 connectDb();
 
 server.listen(process.env.LOCALHOST, () => console.log("app listen"));
