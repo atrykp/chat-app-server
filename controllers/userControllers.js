@@ -1,8 +1,11 @@
 const asyncHandler = require("express-async-handler");
+var jwt = require("jsonwebtoken");
 
 const User = require("../models/user-models");
-const login = (req, res) => {};
 
+const signToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_PASS);
+};
 const signup = asyncHandler(async (req, res) => {
   const userExist = await User.findOne({ email: req.body.email });
 
@@ -20,8 +23,28 @@ const signup = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid user data");
   }
+  const token = signToken(newUser._id);
+  res.status(201).send({ _id: newUser._id, token });
+});
 
-  res.status(201).send(newUser);
+const login = asyncHandler(async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    res.status(400);
+    return next(new Error("email and password are required"));
+  }
+
+  const user = await User.findOne({ email }).select("+password");
+
+  const isPasswordCorrect = await user.correctPassword(password, user.password);
+  if (!user || !isPasswordCorrect) {
+    res.status(401);
+    return next(new Error("invalid email or password"));
+  }
+  const token = signToken(user._id);
+
+  res.status(200).send({ _id: user._id, token });
 });
 
 module.exports.login = login;
