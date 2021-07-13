@@ -4,7 +4,9 @@ var jwt = require("jsonwebtoken");
 const User = require("../models/user-models");
 
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_PASS);
+  return jwt.sign({ id }, process.env.JWT_PASS, {
+    expiresIn: "30m",
+  });
 };
 const signup = asyncHandler(async (req, res) => {
   const userExist = await User.findOne({ email: req.body.email });
@@ -38,6 +40,7 @@ const login = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email }).select("+password");
 
   const isPasswordCorrect = await user.correctPassword(password, user.password);
+
   if (!user || !isPasswordCorrect) {
     res.status(401);
     return next(new Error("invalid email or password"));
