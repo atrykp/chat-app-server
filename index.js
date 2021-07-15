@@ -3,6 +3,7 @@ const http = require("http");
 const cors = require("cors");
 
 const user = require("./routes/userRoutes");
+const conversation = require("./routes/conversationRoutes");
 const connectDb = require("./mongoose");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 
@@ -17,6 +18,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 //routes
 app.use("/user", user);
+app.use("/conversations", conversation);
 app.use(errorMiddleware.notFound);
 app.use(errorMiddleware.errorHandler);
 
