@@ -28,7 +28,7 @@ const protect = asyncHandler(async (req, res, next) => {
     res.status(401);
     return next(new Error("not found user with this token"));
   }
-  if (user.changesPasswordAfter(decoded.iat)) {
+  if (user.changedPasswordAfter(decoded.iat)) {
     res.status(401);
     return next(
       new Error("user recently changed password please log in again")
@@ -37,3 +37,5 @@ const protect = asyncHandler(async (req, res, next) => {
   req.user = user;
   next();
 });
+
+module.exports = protect;
