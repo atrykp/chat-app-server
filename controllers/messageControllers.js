@@ -18,4 +18,15 @@ const createMessage = asyncHandler(async (req, res) => {
   res.send(message);
 });
 
+const getMessages = asyncHandler(async (req, res) => {
+  const conversationId = req.params.id;
+  const messages = await Message.find({ conversationId });
+  if (!messages) {
+    res.status(404);
+    throw new Error("couldnt find conversation");
+  }
+  res.send(messages);
+});
+
 module.exports.createMessage = createMessage;
+module.exports.getMessages = getMessages;
