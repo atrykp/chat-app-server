@@ -16,7 +16,7 @@ const signup = asyncHandler(async (req, res) => {
     throw new Error("User already exist");
   }
   const newUser = await User.create({
-    name: req.body.name,
+    username: req.body.username,
     email: req.body.email,
     password: req.body.password,
   });
@@ -26,7 +26,12 @@ const signup = asyncHandler(async (req, res) => {
     throw new Error("Invalid user data");
   }
   const token = signToken(newUser._id);
-  res.status(201).send({ _id: newUser._id, token });
+  res.status(201).send({
+    _id: newUser._id,
+    username: newUser.username,
+    email: newUser.email,
+    token,
+  });
 });
 
 const login = asyncHandler(async (req, res, next) => {
@@ -47,8 +52,30 @@ const login = asyncHandler(async (req, res, next) => {
   }
   const token = signToken(user._id);
 
-  res.status(200).send({ _id: user._id, token });
+  res.status(200).send({
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    token,
+  });
+});
+const getUserById = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  res.status(200).json({
+    user: {
+      username: user.username,
+      _id: user._id,
+      description: user.description,
+    },
+  });
 });
 
 module.exports.login = login;
 module.exports.signup = signup;
+module.exports.getUserById = getUserById;
