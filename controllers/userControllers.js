@@ -9,29 +9,33 @@ const signToken = (id) => {
   });
 };
 const signup = asyncHandler(async (req, res) => {
-  const userExist = await User.findOne({ email: req.body.email });
+  const [photo] = req.files;
+  console.log(photo);
+  console.log(req.body.email);
 
-  if (userExist) {
-    res.status(400);
-    throw new Error("User already exist");
-  }
-  const newUser = await User.create({
-    username: req.body.username,
-    email: req.body.email,
-    password: req.body.password,
-  });
+  // const userExist = await User.findOne({ email: req.body.email });
 
-  if (!newUser) {
-    res.status(400);
-    throw new Error("Invalid user data");
-  }
-  const token = signToken(newUser._id);
-  res.status(201).send({
-    _id: newUser._id,
-    username: newUser.username,
-    email: newUser.email,
-    token,
-  });
+  // if (userExist) {
+  //   res.status(400);
+  //   throw new Error("User already exist");
+  // }
+  // const newUser = await User.create({
+  //   username: req.body.username,
+  //   email: req.body.email,
+  //   password: req.body.password,
+  // });
+
+  // if (!newUser) {
+  //   res.status(400);
+  //   throw new Error("Invalid user data");
+  // }
+  // const token = signToken(newUser._id);
+  // res.status(201).send({
+  //   _id: newUser._id,
+  //   username: newUser.username,
+  //   email: newUser.email,
+  //   token,
+  // });
 });
 
 const login = asyncHandler(async (req, res, next) => {
