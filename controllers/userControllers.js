@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
-var jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
+const uploadImage = require("../cloudinary");
 
 const User = require("../models/user-models");
 
@@ -10,8 +11,9 @@ const signToken = (id) => {
 };
 const signup = asyncHandler(async (req, res) => {
   const [photo] = req.files;
-  console.log(photo);
-  console.log(req.body.email);
+  const answear = await uploadImage(photo.buffer);
+  const photoUrl = answear.url;
+  console.log(photoUrl);
 
   // const userExist = await User.findOne({ email: req.body.email });
 
