@@ -14,6 +14,9 @@ const userSchema = new Schema(
       type: String,
       default: "Hey, im new here",
     },
+    profilePicture: {
+      type: String,
+    },
     email: {
       type: String,
       required: [true, "email is required"],

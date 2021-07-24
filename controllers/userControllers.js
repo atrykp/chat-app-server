@@ -10,34 +10,39 @@ const signToken = (id) => {
   });
 };
 const signup = asyncHandler(async (req, res) => {
+  let photoUrl =
+    "http://res.cloudinary.com/dxswvlmvl/image/upload/v1626754829/user/xq6byb65z73efkag6t6f.jpg";
   const [photo] = req.files;
-  const answear = await uploadImage(photo.buffer);
-  const photoUrl = answear.url;
-  console.log(photoUrl);
+  if (photo) {
+    const answear = await uploadImage(photo.buffer);
+    photoUrl = answear.url;
+  }
+  const userExist = await User.findOne({ email: req.body.email });
 
-  // const userExist = await User.findOne({ email: req.body.email });
+  if (userExist) {
+    res.status(400);
+    throw new Error("User already exist");
+  }
+  const newUser = await User.create({
+    username: req.body.username,
+    email: req.body.email,
+    password: req.body.password,
+    profilePicture: photoUrl,
+  });
 
-  // if (userExist) {
-  //   res.status(400);
-  //   throw new Error("User already exist");
-  // }
-  // const newUser = await User.create({
-  //   username: req.body.username,
-  //   email: req.body.email,
-  //   password: req.body.password,
-  // });
-
-  // if (!newUser) {
-  //   res.status(400);
-  //   throw new Error("Invalid user data");
-  // }
-  // const token = signToken(newUser._id);
-  // res.status(201).send({
-  //   _id: newUser._id,
-  //   username: newUser.username,
-  //   email: newUser.email,
-  //   token,
-  // });
+  if (!newUser) {
+    res.status(400);
+    throw new Error("Invalid user data");
+  }
+  const token = signToken(newUser._id);
+  res.status(201).send({
+    _id: newUser._id,
+    username: newUser.username,
+    email: newUser.email,
+    profilePicture: newUser.profilePicture,
+    description: newUser.description,
+    token,
+  });
 });
 
 const login = asyncHandler(async (req, res, next) => {
@@ -62,6 +67,8 @@ const login = asyncHandler(async (req, res, next) => {
     _id: user._id,
     username: user.username,
     email: user.email,
+    profilePicture: user.profilePicture,
+    description: user.description,
     token,
   });
 });
@@ -78,10 +85,31 @@ const getUserById = asyncHandler(async (req, res) => {
       username: user.username,
       _id: user._id,
       description: user.description,
+      profilePicture: user.profilePicture,
     },
   });
+});
+
+const findUsersByUserName = asyncHandler(async (req, res) => {
+  const userName = req.params.name;
+  const usersList = await User.find({
+    username: { $regex: userName, $options: "i" },
+  });
+
+  if (!usersList) {
+    res.status(404);
+    throw new Error("Users not found");
+  }
+
+  const users = usersList.map((element) => ({
+    userName: element.username,
+    profilePicture: element.profilePicture,
+    _id: element._id,
+  }));
+  res.send(users);
 });
 
 module.exports.login = login;
 module.exports.signup = signup;
 module.exports.getUserById = getUserById;
+module.exports.findUsersByUserName = findUsersByUserName;
