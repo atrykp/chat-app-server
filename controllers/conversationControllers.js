@@ -2,14 +2,23 @@ const Conversation = require("../models/conversation-models");
 const asyncHandler = require("express-async-handler");
 
 const createConversation = asyncHandler(async (req, res) => {
-  const conversation = await Conversation.create({
-    members: req.body.members,
+  const userId = req.user.id;
+  const isExist = await Conversation.findOne({
+    members: { $all: [userId, req.body.member] },
   });
-  if (!conversation) {
-    res.status(400);
-    throw new Error("Didnt add conversation");
+  console.log(isExist);
+  if (isExist) {
+    res.send({ _id: isExist._id });
+  } else {
+    const conversation = await Conversation.create({
+      members: [userId, req.body.member],
+    });
+    if (!conversation) {
+      res.status(400);
+      throw new Error("Didnt add conversation");
+    }
+    res.send(conversation);
   }
-  res.send(conversation);
 });
 
 const getConversation = asyncHandler(async (req, res) => {
