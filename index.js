@@ -9,6 +9,7 @@ const conversation = require("./routes/conversationRoutes");
 const message = require("./routes/messageRoutes");
 const connectDb = require("./mongoose");
 const errorMiddleware = require("./middlewares/errorMiddleware");
+const userOnline = require("./assets/helpers/usersOnlineFunctions");
 
 const app = express();
 require("dotenv").config();
@@ -37,8 +38,18 @@ app.use(errorMiddleware.errorHandler);
 
 connectDb();
 
+let usersOnline = [];
+
 io.on("connection", (socket) => {
-  socket.emit("hello", "eluwina");
+  io.emit("hello", "user connected");
+  socket.on("userId", (userId) => {
+    usersOnline = userOnline.addUser(userId, socket.id, usersOnline);
+  });
+  io.emit("usersOnline", usersOnline);
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+    usersOnline = userOnline.removeUser(socket.id, usersOnline);
+  });
 });
 
 server.listen(process.env.LOCALHOST, () => console.log("app listen"));
