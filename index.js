@@ -46,6 +46,16 @@ io.on("connection", (socket) => {
     usersOnline = userOnline.addUser(userId, socket.id, usersOnline);
   });
   io.emit("usersOnline", usersOnline);
+  socket.on("sendMessage", (message) => {
+    const receiverSocket = usersOnline.find(
+      (element) => element.userId === message.receiverId
+    );
+    if (receiverSocket) {
+      io.to(receiverSocket.socketId).emit("getMessage", message);
+    } else {
+      console.log("user offline");
+    }
+  });
   socket.on("disconnect", () => {
     console.log("user disconnected");
     usersOnline = userOnline.removeUser(socket.id, usersOnline);
