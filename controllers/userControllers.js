@@ -109,7 +109,14 @@ const findUsersByUserName = asyncHandler(async (req, res) => {
   res.send(users);
 });
 
+const removeUser = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const data = await User.findByIdAndRemove(userId);
+  res.send({ message: "user deleted" }); // TODO add user id
+});
+
 module.exports.login = login;
 module.exports.signup = signup;
 module.exports.getUserById = getUserById;
 module.exports.findUsersByUserName = findUsersByUserName;
+module.exports.removeUser = removeUser;

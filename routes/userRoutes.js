@@ -4,6 +4,7 @@ const protect = require("../middlewares/protect");
 
 const userRouter = express.Router();
 
+userRouter.delete("/", protect, controller.removeUser);
 userRouter.post("/login", controller.login);
 userRouter.post("/signup", controller.signup);
 userRouter.get("/:id", protect, controller.getUserById);

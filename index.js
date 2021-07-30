@@ -42,10 +42,10 @@ let usersOnline = [];
 
 io.on("connection", (socket) => {
   io.emit("hello", "user connected");
-  socket.on("userId", (userId) => {
-    usersOnline = userOnline.addUser(userId, socket.id, usersOnline);
+  socket.on("userId", async (userId) => {
+    usersOnline = await userOnline.addUser(userId, socket.id, usersOnline);
+    io.emit("usersOnline", usersOnline);
   });
-  io.emit("usersOnline", usersOnline);
   socket.on("sendMessage", (message) => {
     const receiverSocket = usersOnline.find(
       (element) => element.userId === message.receiverId
