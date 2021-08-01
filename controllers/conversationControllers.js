@@ -6,7 +6,6 @@ const createConversation = asyncHandler(async (req, res) => {
   const isExist = await Conversation.findOne({
     members: { $all: [userId, req.body.member] },
   });
-  console.log(isExist);
   if (isExist) {
     res.send({ _id: isExist._id });
   } else {
@@ -24,10 +23,7 @@ const createConversation = asyncHandler(async (req, res) => {
 const getConversation = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const conversations = await Conversation.find({ members: { $in: [userId] } });
-  if (!conversations.length) {
-    res.status(404);
-    throw new Error("didnt find conversations");
-  }
+
   res.send(conversations);
 });
 

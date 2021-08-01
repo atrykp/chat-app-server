@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const uploadImage = require("../cloudinary");
 
 const User = require("../models/user-models");
+const Message = require("../models/message-model");
+const Conversation = require("../models/conversation-models");
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_PASS, {
@@ -111,8 +113,15 @@ const findUsersByUserName = asyncHandler(async (req, res) => {
 
 const removeUser = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const data = await User.findByIdAndRemove(userId);
-  res.send({ message: "user deleted" }); // TODO add user id
+  await User.findByIdAndRemove(userId);
+  const data = await Conversation.find({ members: { $in: [userId] } });
+  await Conversation.deleteMany({ members: { $in: [userId] } });
+  Promise.all(
+    data.map(async (conver) => {
+      await Message.deleteMany({ conversationId: conver._id });
+    })
+  );
+  res.send({ message: "user deleted" });
 });
 
 module.exports.login = login;
