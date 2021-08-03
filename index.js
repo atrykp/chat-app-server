@@ -59,6 +59,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("user disconnected");
     usersOnline = userOnline.removeUser(socket.id, usersOnline);
+    io.emit("usersOnline", usersOnline);
   });
 });
 

@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const uploadImage = require("../cloudinary");
+const bcrypt = require("bcrypt");
 
 const User = require("../models/user-models");
 const Message = require("../models/message-model");
@@ -124,8 +125,21 @@ const removeUser = asyncHandler(async (req, res) => {
   res.send({ message: "user deleted" });
 });
 
+const editUserById = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  if (req.body.password) {
+    const salt = await bcrypt.genSalt(10);
+    req.body.password = await bcrypt.hash(req.body.password, salt);
+  }
+  const data = await User.findOneAndUpdate({ _id: userId }, req.body, {
+    new: true,
+  });
+  res.send(data);
+});
+
 module.exports.login = login;
 module.exports.signup = signup;
 module.exports.getUserById = getUserById;
 module.exports.findUsersByUserName = findUsersByUserName;
 module.exports.removeUser = removeUser;
+module.exports.editUserById = editUserById;
