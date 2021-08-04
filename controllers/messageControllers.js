@@ -28,5 +28,20 @@ const getMessages = asyncHandler(async (req, res) => {
   res.send(messages);
 });
 
+const updateMessages = asyncHandler(async (req, res) => {
+  const updatedMessages = await Promise.all(
+    req.body.map(async (element) => {
+      return await Message.findByIdAndUpdate(
+        element._id,
+        { isRead: true },
+        { new: true }
+      );
+    })
+  );
+
+  res.send(updatedMessages);
+});
+
 module.exports.createMessage = createMessage;
 module.exports.getMessages = getMessages;
+module.exports.updateMessages = updateMessages;
