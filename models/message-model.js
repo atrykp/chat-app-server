@@ -18,6 +18,10 @@ const messageSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    messageDate: {
+      type: Number,
+      default: Date.now(),
+    },
   },
   { timestamps: true }
 );

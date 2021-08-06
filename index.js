@@ -9,7 +9,9 @@ const conversation = require("./routes/conversationRoutes");
 const message = require("./routes/messageRoutes");
 const connectDb = require("./mongoose");
 const errorMiddleware = require("./middlewares/errorMiddleware");
-const userOnline = require("./assets/helpers/usersOnlineFunctions");
+
+const userSocket = require("./controllers/userControllers");
+const messageSocket = require("./controllers/messageControllers");
 
 const app = express();
 require("dotenv").config();
@@ -29,7 +31,9 @@ const corsOptions = {
   origin: ["http://localhost:3000"],
 };
 app.use(cors(corsOptions));
+
 //routes
+
 app.use("/user", user);
 app.use("/conversations", conversation);
 app.use("/message", message);
@@ -38,29 +42,13 @@ app.use(errorMiddleware.errorHandler);
 
 connectDb();
 
-let usersOnline = [];
-
-io.on("connection", (socket) => {
+const onConnection = (socket) => {
   io.emit("hello", "user connected");
-  socket.on("userId", async (userId) => {
-    usersOnline = await userOnline.addUser(userId, socket.id, usersOnline);
-    io.emit("usersOnline", usersOnline);
-  });
-  socket.on("sendMessage", (message) => {
-    const receiverSocket = usersOnline.find(
-      (element) => element.userId === message.receiverId
-    );
-    if (receiverSocket) {
-      io.to(receiverSocket.socketId).emit("getMessage", message);
-    } else {
-      console.log("user offline");
-    }
-  });
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-    usersOnline = userOnline.removeUser(socket.id, usersOnline);
-    io.emit("usersOnline", usersOnline);
-  });
-});
+  userSocket.onlineUsers(io, socket);
+  userSocket.userDisconnect(io, socket);
+  messageSocket.handleSendMessage(io, socket);
+};
+
+io.on("connection", onConnection);
 
 server.listen(process.env.LOCALHOST, () => console.log("app listen"));

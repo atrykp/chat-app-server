@@ -42,6 +42,24 @@ const updateMessages = asyncHandler(async (req, res) => {
   res.send(updatedMessages);
 });
 
+//socket
+
+const handleSendMessage = (io, socket) => {
+  socket.on("sendMessage", (message) => {
+    const receiverSocket = usersOnline.find(
+      (element) => element.userId === message.receiverId
+    );
+    if (receiverSocket) {
+      io.to(receiverSocket.socketId).emit("getMessage", message);
+    } else {
+      console.log("user offline");
+    }
+  });
+};
+
 module.exports.createMessage = createMessage;
 module.exports.getMessages = getMessages;
 module.exports.updateMessages = updateMessages;
+//socket
+module.exports.updateMessages = updateMessages;
+module.exports.handleSendMessage = handleSendMessage;

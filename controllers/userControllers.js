@@ -7,6 +7,8 @@ const User = require("../models/user-models");
 const Message = require("../models/message-model");
 const Conversation = require("../models/conversation-models");
 
+const userOnline = require("../assets/helpers/usersOnlineFunctions");
+
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_PASS, {
     expiresIn: "30m",
@@ -137,9 +139,30 @@ const editUserById = asyncHandler(async (req, res) => {
   res.send(data);
 });
 
+// socket
+
+let usersOnline = [];
+
+const onlineUsers = (io, socket) => {
+  socket.on("userId", async (userId) => {
+    usersOnline = await userOnline.addUser(userId, socket.id, usersOnline);
+    io.emit("usersOnline", usersOnline);
+  });
+};
+
+const userDisconnect = (io, socket) => {
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+    usersOnline = userOnline.removeUser(socket.id, usersOnline);
+    io.emit("usersOnline", usersOnline);
+  });
+};
+
 module.exports.login = login;
 module.exports.signup = signup;
 module.exports.getUserById = getUserById;
 module.exports.findUsersByUserName = findUsersByUserName;
 module.exports.removeUser = removeUser;
 module.exports.editUserById = editUserById;
+module.exports.onlineUsers = onlineUsers;
+module.exports.userDisconnect = userDisconnect;
