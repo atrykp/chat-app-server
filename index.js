@@ -3,6 +3,7 @@ const http = require("http");
 const cors = require("cors");
 const multer = require("multer");
 const upload = multer();
+const socketioJwt = require("socketio-jwt");
 
 const user = require("./routes/userRoutes");
 const conversation = require("./routes/conversationRoutes");
@@ -48,6 +49,13 @@ const onConnection = (socket) => {
   userSocket.userDisconnect(io, socket);
   messageSocket.handleSendMessage(io, socket);
 };
+
+io.use(
+  socketioJwt.authorize({
+    secret: process.env.JWT_PASS,
+    handshake: true,
+  })
+);
 
 io.on("connection", onConnection);
 

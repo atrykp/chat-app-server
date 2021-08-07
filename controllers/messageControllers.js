@@ -46,14 +46,10 @@ const updateMessages = asyncHandler(async (req, res) => {
 
 const handleSendMessage = (io, socket) => {
   socket.on("sendMessage", (message) => {
-    const receiverSocket = usersOnline.find(
-      (element) => element.userId === message.receiverId
-    );
-    if (receiverSocket) {
-      io.to(receiverSocket.socketId).emit("getMessage", message);
-    } else {
-      console.log("user offline");
-    }
+    console.log(message.receiverSocketId);
+
+    if (message.receiverSocketId)
+      io.to(message.receiverSocketId).emit("getMessage", message);
   });
 };
 
