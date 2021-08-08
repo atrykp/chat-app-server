@@ -18,6 +18,10 @@ const messageSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isSent: {
+      type: Boolean,
+      default: true,
+    },
     messageDate: {
       type: Number,
       default: Date.now(),

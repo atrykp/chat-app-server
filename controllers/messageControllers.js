@@ -1,22 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Message = require("../models/message-model");
-
-const createMessage = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const conversationId = req.body.conversationId;
-  const message = await Message.create({
-    conversationId,
-    sender: userId,
-    text: req.body.text,
-  });
-
-  if (!message) {
-    res.status(400);
-    throw new Error("couldnt send message");
-  }
-
-  res.send(message);
-});
+const Conversation = require("../models/conversation-models");
 
 const getMessages = asyncHandler(async (req, res) => {
   const conversationId = req.params.id;
@@ -45,17 +29,57 @@ const updateMessages = asyncHandler(async (req, res) => {
 //socket
 
 const handleSendMessage = (io, socket) => {
-  socket.on("sendMessage", (message) => {
-    console.log(message.receiverSocketId);
+  socket.on("sendMessage", async (message) => {
+    const {
+      conversationId,
+      senderId,
+      message: text,
+      senderSocketId,
+      receiverId,
+      receiverSocketId,
+    } = message;
 
-    if (message.receiverSocketId)
-      io.to(message.receiverSocketId).emit("getMessage", message);
+    const newMessage = await Message.create({
+      conversationId,
+      sender: senderId,
+      text,
+    });
+
+    if (!newMessage) {
+      throw new Error("couldnt send message");
+    } else {
+      io.to(senderSocketId).emit("messageSent", newMessage);
+    }
+    if (receiverSocketId)
+      io.to(message.receiverSocketId).emit("getMessage", newMessage);
   });
 };
 
-module.exports.createMessage = createMessage;
+const unreadMessages = (io, socket) => {
+  socket.on("getUnread", async (userId) => {
+    const unread = {};
+    const conversations = await Conversation.find({
+      members: { $in: [userId] },
+    });
+
+    const conversationsId = conversations.map((element) => element._id);
+    for (let element of conversationsId) {
+      const messagesArr = await Message.find({
+        conversationId: element,
+        isRead: false,
+        sender: { $ne: userId },
+      });
+      if (messagesArr.length > 0) {
+        unread[element] = messagesArr;
+      }
+    }
+    io.to(socket.id).emit("unread", unread);
+  });
+};
+
 module.exports.getMessages = getMessages;
 module.exports.updateMessages = updateMessages;
 //socket
 module.exports.updateMessages = updateMessages;
 module.exports.handleSendMessage = handleSendMessage;
+module.exports.unreadMessages = unreadMessages;
