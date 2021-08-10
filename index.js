@@ -49,6 +49,7 @@ const onConnection = (socket) => {
   userSocket.userDisconnect(io, socket);
   messageSocket.handleSendMessage(io, socket);
   messageSocket.unreadMessages(io, socket);
+  messageSocket.setIsRead(io, socket);
 };
 
 io.use(

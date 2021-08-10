@@ -12,20 +12,6 @@ const getMessages = asyncHandler(async (req, res) => {
   res.send(messages);
 });
 
-const updateMessages = asyncHandler(async (req, res) => {
-  const updatedMessages = await Promise.all(
-    req.body.map(async (element) => {
-      return await Message.findByIdAndUpdate(
-        element._id,
-        { isRead: true },
-        { new: true }
-      );
-    })
-  );
-
-  res.send(updatedMessages);
-});
-
 //socket
 
 const handleSendMessage = (io, socket) => {
@@ -77,9 +63,25 @@ const unreadMessages = (io, socket) => {
   });
 };
 
+const setIsRead = (io, socket) => {
+  socket.on("readMessages", async (data) => {
+    const { unreadMessages, socketId } = data;
+
+    const updatedMessages = await Promise.all(
+      unreadMessages.map(async (element) => {
+        return await Message.findByIdAndUpdate(
+          element._id,
+          { isRead: true },
+          { new: true }
+        );
+      })
+    );
+    if (socketId) io.to(socketId).emit("displayedMessages", updatedMessages);
+  });
+};
+
 module.exports.getMessages = getMessages;
-module.exports.updateMessages = updateMessages;
 //socket
-module.exports.updateMessages = updateMessages;
 module.exports.handleSendMessage = handleSendMessage;
 module.exports.unreadMessages = unreadMessages;
+module.exports.setIsRead = setIsRead;
