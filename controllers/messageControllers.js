@@ -24,11 +24,11 @@ const handleSendMessage = (io, socket) => {
       receiverId,
       receiverSocketId,
     } = message;
-
     const newMessage = await Message.create({
       conversationId,
       sender: senderId,
       text,
+      messageDate: Date.now(),
     });
 
     if (!newMessage) {
