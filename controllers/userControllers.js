@@ -16,7 +16,7 @@ const signToken = (id) => {
 };
 const signup = asyncHandler(async (req, res) => {
   let photoUrl =
-    "http://res.cloudinary.com/dxswvlmvl/image/upload/v1626754829/user/xq6byb65z73efkag6t6f.jpg";
+    "https://res.cloudinary.com/dxswvlmvl/image/upload/v1628916372/user/userD_y4of5b.svg";
   const [photo] = req.files;
   if (photo) {
     const answear = await uploadImage(photo.buffer);
@@ -145,13 +145,22 @@ let usersOnline = [];
 
 const onlineUsers = (io, socket) => {
   socket.on("userId", async (userId) => {
+    await User.findOneAndUpdate({ _id: userId }, { online: "online" });
     usersOnline = await userOnline.addUser(userId, socket.id, usersOnline);
     io.emit("usersOnline", usersOnline);
   });
 };
 
 const userDisconnect = (io, socket) => {
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
+    const userId = usersOnline.filter(
+      (element) => element.socketId === socket.id
+    );
+
+    await User.findOneAndUpdate(
+      { _id: userId[0].userId },
+      { online: `${Date.now()}` }
+    );
     console.log("user disconnected");
     usersOnline = userOnline.removeUser(socket.id, usersOnline);
     io.emit("usersOnline", usersOnline);

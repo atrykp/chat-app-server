@@ -29,6 +29,9 @@ const userSchema = new Schema(
       minlength: 5,
       select: false,
     },
+    online: {
+      type: String,
+    },
     passwordChangedAt: Date,
   },
   { timestamps: true }
