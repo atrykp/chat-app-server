@@ -50,6 +50,7 @@ const onConnection = (socket) => {
   messageSocket.handleSendMessage(io, socket);
   messageSocket.unreadMessages(io, socket);
   messageSocket.setIsRead(io, socket);
+  messageSocket.isUserTyping(io, socket);
 };
 
 io.use(

@@ -80,8 +80,15 @@ const setIsRead = (io, socket) => {
   });
 };
 
+const isUserTyping = (io, socket) => {
+  socket.on("writing", (data) => {
+    io.to(data.socketId).emit("typing", data.conversationId);
+  });
+};
+
 module.exports.getMessages = getMessages;
 //socket
 module.exports.handleSendMessage = handleSendMessage;
 module.exports.unreadMessages = unreadMessages;
 module.exports.setIsRead = setIsRead;
+module.exports.isUserTyping = isUserTyping;

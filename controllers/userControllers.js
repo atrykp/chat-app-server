@@ -77,6 +77,7 @@ const login = asyncHandler(async (req, res, next) => {
     token,
   });
 });
+
 const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
@@ -91,6 +92,7 @@ const getUserById = asyncHandler(async (req, res) => {
       _id: user._id,
       description: user.description,
       profilePicture: user.profilePicture,
+      online: user.online,
     },
   });
 });
@@ -110,6 +112,7 @@ const findUsersByUserName = asyncHandler(async (req, res) => {
     userName: element.username,
     profilePicture: element.profilePicture,
     _id: element._id,
+    online: element.online,
   }));
   res.send(users);
 });
@@ -153,14 +156,17 @@ const onlineUsers = (io, socket) => {
 
 const userDisconnect = (io, socket) => {
   socket.on("disconnect", async () => {
-    const userId = usersOnline.filter(
-      (element) => element.socketId === socket.id
-    );
+    const userId = !!usersOnline.length
+      ? usersOnline.filter((element) => element.socketId === socket.id)
+      : "";
 
-    await User.findOneAndUpdate(
-      { _id: userId[0].userId },
-      { online: `${Date.now()}` }
-    );
+    if (userId) {
+      await User.findOneAndUpdate(
+        { _id: userId[0].userId },
+        { online: `${Date.now()}` }
+      );
+    }
+
     console.log("user disconnected");
     usersOnline = userOnline.removeUser(socket.id, usersOnline);
     io.emit("usersOnline", usersOnline);
