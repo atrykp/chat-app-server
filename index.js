@@ -13,7 +13,7 @@ const errorMiddleware = require("./middlewares/errorMiddleware");
 
 const userSocket = require("./controllers/userControllers");
 const messageSocket = require("./controllers/messageControllers");
-
+const PORT = process.env.PORT || 5000;
 const app = express();
 require("dotenv").config();
 const server = http.createServer(app);
@@ -62,4 +62,4 @@ io.use(
 
 io.on("connection", onConnection);
 
-server.listen(process.env.LOCALHOST, () => console.log("app listen"));
+server.listen(PORT, () => console.log("app listen"));
