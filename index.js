@@ -20,7 +20,9 @@ const server = http.createServer(app);
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: `${
+      process.env.FRONTEND ? process.env.FRONTEND : "http://localhost:3000"
+    }`,
   },
 });
 
@@ -29,7 +31,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(upload.any());
 
 const corsOptions = {
-  origin: ["http://localhost:3000"],
+  origin: [
+    `${process.env.FRONTEND ? process.env.FRONTEND : "http://localhost:3000"}`,
+  ],
 };
 app.use(cors(corsOptions));
 
