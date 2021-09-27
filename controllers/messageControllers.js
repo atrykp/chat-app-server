@@ -2,13 +2,21 @@ const asyncHandler = require("express-async-handler");
 const Message = require("../models/message-model");
 const Conversation = require("../models/conversation-models");
 
+const messagesQuantity = 20;
+
 const getMessages = asyncHandler(async (req, res) => {
   const conversationId = req.params.id;
-  const messages = await Message.find({ conversationId });
-  if (!messages) {
+  const messagesArr = await Message.find({ conversationId });
+
+  if (!messagesArr) {
     res.status(404);
     throw new Error("couldnt find conversation");
   }
+
+  const messages = messagesArr
+    .reverse()
+    .slice(0, messagesQuantity * req.query.page + messagesQuantity);
+
   res.send(messages);
 });
 
